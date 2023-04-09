@@ -1,0 +1,46 @@
+# The Pareto Distribution
+```{r}
+library(MASS)
+x<-2:11
+alpha<-1:10
+beta<-2
+f<-beta*alpha^beta/x^(beta+1)
+f.new<-paste0("'", fractions(f),"'")
+
+df<-data.frame(cbind(x,alpha,beta,f.new))
+print(df)
+```
+
+```{r}
+source("..\\R\\dparetoR.R")
+curve( dparetoR( x, 1, 2 ), from = 0, to = 10 )
+```
+
+```{r}
+x<-1:10
+alpha=1
+beta=2
+f<-beta*alpha^beta/x^(beta+1)
+f.frac<-paste0("'", fractions(f),"'")
+
+pdf<-dparetoR(x,alpha,beta)
+
+df<-data.frame(cbind(x,alpha,beta,f.frac,pdf))
+
+
+all.equal(f,pdf)
+```
+
+```{r}
+dparetoR
+
+par(mfrow=c(1,3))
+# alpha=1, and beta=2
+curve( dparetoR( x, 1, 2 ), from = 0, to = 10 , col='red')
+# alpha=2, and beta=3
+curve( dparetoR( x, 2, 3 ), from = 0, to = 10 , col='blue')
+# alpha=1, and beta=3
+curve( dparetoR( x, 1, 3 ), from = 0, to = 10 , col='green')
+
+```
+
