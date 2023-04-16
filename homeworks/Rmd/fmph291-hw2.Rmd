@@ -1,0 +1,100 @@
+
+# Test dpareto function and examples of its use
+```{r}
+Rcpp::sourceCpp("../Rcpp/dpareto.cpp")
+set.seed(123)
+x <- runif(5,0,10)
+dpareto(x, 4.0, seq(3.0, 5.0, by= 0.75))
+dpareto(1.0, 2.0, NA)
+dpareto(1000, 1000, 1000)
+
+```
+
+
+
+# Compare dpareto and dparetoR function by same cases
+```{r, warning=FALSE}
+source("../R/dparetoR.R")
+Rcpp::sourceCpp("../Rcpp/dpareto.cpp")
+
+# test case 1
+set.seed(123)
+x = runif(5,0,10)
+alpha = 4
+beta = seq(3.0, 5.0, by= 0.75)
+
+all.equal(dparetoR(x,alpha,beta), dpareto(x,alpha,beta))
+
+
+# test case 2
+x = 1
+alpha = 2
+beta = NA
+
+all.equal(dparetoR(x,alpha,beta), dpareto(x,alpha,beta))
+
+
+# test case 3
+x = 1000
+alpha = 1000
+beta = 1000
+
+all.equal(dparetoR(x,alpha,beta), dpareto(x,alpha,beta))
+```
+
+# Explaination
+The inputs of dpareto function are three vectors that have different length. In order to calculate pareto density distribution of each points, we need to recycles them to the same length (the longest one). Then, it vectorizes the elements of each input vector and put the values of the three elements at the current position in each of the three input vectors to paretodens function. The paretodens function will calculate the probability density function with given elements and store the density value in vector f. Finally, we can have the result we want in cycle. 
+
+To run this function in R, we need to source this Rcpp function by Rcpp::sourceCpp("../Rcpp/dpareto.cpp"). Then, we can input x, alpha and beta vectors in different or same lengths. Finally, We can get the result. 
+
+## Appendix {#appendix}
+```{Rcpp}
+#include <Rcpp.h>
+using namespace Rcpp;
+// [[Rcpp::export]]
+double paretodens(double x, double alpha, double beta) {
+  if (x < alpha) {
+    return 0.0;
+  } else {
+    return beta * pow(alpha, beta) / pow(x, beta + 1.0);
+  }
+}
+  
+
+
+// [[Rcpp::export]]
+NumericVector dpareto(NumericVector x, NumericVector alpha, NumericVector beta, bool logd = false) {
+  int xn = x.size();
+  int alphan = alpha.size();
+  int betan = beta.size();
+  
+    
+    
+  if (xn == 0L || alphan == 0L || betan == 0L) {
+    Rprintf("Zero length detected: xn = %d, alphan = %d, betan = %d\n", xn, alphan, betan);
+  }
+    
+    
+  int n = std::max(std::max(xn, alphan), betan);
+  NumericVector f(n);
+    
+  int ix = 0, ialpha = 0, ibeta = 0;
+  for (int i = 0; i < n; ++i) {
+    
+    if (logd == false) {
+      f[i]=paretodens(x[ix], alpha[ialpha], beta[ibeta]);
+    }
+    
+
+    else {
+      f[i]=log(paretodens(x[ix], alpha[ialpha], beta[ibeta]));
+    }
+      
+    if (++ix == xn) ix = 0;
+    if (++ialpha == alphan) ialpha = 0;
+    if (++ibeta == betan) ibeta = 0;
+  }
+    
+  return f;
+}
+```
