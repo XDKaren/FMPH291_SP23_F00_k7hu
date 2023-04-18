@@ -1,7 +1,7 @@
 \name{times}
 \alias{times}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{
+\title{placeholder
 %%  ~~function to do ... ~~
 }
 \description{
