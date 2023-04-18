@@ -1,0 +1,133 @@
+
+R version 4.2.3 (2023-03-15 ucrt) -- "Shortstop Beagle"
+Copyright (C) 2023 The R Foundation for Statistical Computing
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> pkgname <- "mathtables"
+> source(file.path(R.home("share"), "R", "examples-header.R"))
+> options(warn = 1)
+> options(pager = "console")
+> library('mathtables')
+> 
+> base::assign(".oldSearch", base::search(), pos = 'CheckExEnv')
+> base::assign(".old_wd", base::getwd(), pos = 'CheckExEnv')
+> cleanEx()
+> nameEx("mathtables-package")
+> ### * mathtables-package
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: mathtables-package
+> ### Title: What the package does (short line)
+> ### Aliases: mathtables-package mathtables
+> ### Keywords: package
+> 
+> ### ** Examples
+> 
+>  a=10; b=10; times(a,b);
+      1e+01
+1e+01   100
+> 
+> 
+> 
+> cleanEx()
+> nameEx("plus")
+> ### * plus
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: plus
+> ### Title: placeholder
+> ### Aliases: plus
+> 
+> ### ** Examples
+> 
+> ##---- Should be DIRECTLY executable !! ----
+> ##-- ==>  Define data, use random,
+> ##--	or do  help(data=index)  for the standard data sets.
+> 
+> ## The function is currently defined as
+> function (x, y) 
++ {
++     res <- outer(as.integer(x), as.integer(y), function(xx, yy) as.integer(xx + 
++         yy))
++     dimnames(res) <- list(formatC(x, digits = 0, width = max(nchar(x))), 
++         formatC(y, digits = 0, width = max(nchar(y))))
++     res
++   }
+function (x, y) 
+{
+    res <- outer(as.integer(x), as.integer(y), function(xx, yy) as.integer(xx + 
+        yy))
+    dimnames(res) <- list(formatC(x, digits = 0, width = max(nchar(x))), 
+        formatC(y, digits = 0, width = max(nchar(y))))
+    res
+}
+> 
+> 
+> 
+> cleanEx()
+> nameEx("times")
+> ### * times
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: times
+> ### Title: placeholder
+> ### Aliases: times
+> 
+> ### ** Examples
+> 
+> ##---- Should be DIRECTLY executable !! ----
+> ##-- ==>  Define data, use random,
+> ##--	or do  help(data=index)  for the standard data sets.
+> 
+> ## The function is currently defined as
+> function (x, y) 
++ {
++     res <- outer(as.integer(x), as.integer(y), function(xx, yy) as.integer(xx * 
++         yy))
++     dimnames(res) <- list(formatC(x, digits = 0, width = max(nchar(x))), 
++         formatC(y, digits = 0, width = max(nchar(y))))
++     res
++   }
+function (x, y) 
+{
+    res <- outer(as.integer(x), as.integer(y), function(xx, yy) as.integer(xx * 
+        yy))
+    dimnames(res) <- list(formatC(x, digits = 0, width = max(nchar(x))), 
+        formatC(y, digits = 0, width = max(nchar(y))))
+    res
+}
+> 
+> 
+> 
+> ### * <FOOTER>
+> ###
+> cleanEx()
+> options(digits = 7L)
+> base::cat("Time elapsed: ", proc.time() - base::get("ptime", pos = 'CheckExEnv'),"\n")
+Time elapsed:  0.1 0.02 0.16 NA NA 
+> grDevices::dev.off()
+null device 
+          1 
+> ###
+> ### Local variables: ***
+> ### mode: outline-minor ***
+> ### outline-regexp: "\\(> \\)?### [*]+" ***
+> ### End: ***
+> quit('no')
