@@ -1,0 +1,115 @@
+---
+title: "numderivs"
+author: "Keren Hu"
+date: "2023-04-20"
+output: pdf_document
+---
+
+We have three different methods to calculate approximations to the derivative of a function. The first one is forward difference quotient:
+$$
+\partial_F(f,x,h)=\frac{f(x+h)-f(x)}{h}
+$$
+The second method is the central, or symmetric, difference quotient:
+$$
+\partial_S(f,x,h)=\frac{f(x+h)-f(x-h)}{2h}
+$$
+The third method is below, where $i=\sqrt{-i}$ is is the imaginary unit and $\Im(z)$ is the imaginary part of the complex number z:
+$$
+\partial_C(f,x,h)=\frac{\Im(f(x+hi))}{2h}
+$$
+To investigate the principle to select step h, we choose h in range of $2^{-1}, 2^{-2},...,2^{-64}$ and following four functions to plot approximations against $-log_2(h)$ in above three methods. 
+
+# f1(x) = sin(x) at x = 1
+```{r}
+h = 2^(-(1:64))
+d1f = rep(0, length(h))
+d1s = rep(0, length(h))
+d1c = rep(0, length(h))
+
+
+for (a in 1:64){
+  d1f[a]=(sin(1+h[a])-sin(1))/h[a]
+  
+  d1s[a]=(sin(1+h[a])-sin(1-h[a]))/(2*h[a])
+
+  d1c[a]=Im(sin(1+h[a]*1i))/h[a]
+}
+
+plot(-log2(h), d1f, col ="red",pch=1, cex=1.2, lwd=1.5, xlab="-log2(h)", ylab="Approximations to the derivative of a function f1", main="f1(x)=sin(x) at x=1")
+points(-log2(h), d1s, pch=2, col="blue",lwd=1.5)
+points(-log2(h), d1c, pch=3, col="orange",lwd=1.5)
+legend("bottom", legend=c("forward difference quotient", "symmetric difference quotient", "complex number quotient"), col=c("red","blue","orange"), pch=c(1,2,3), lwd=c(1.5,1.5,1.5))
+```
+
+# f2(x) = 10000sin(x) at x = 1
+```{r}
+h = 2^(-(1:64))
+d2f = rep(0, length(h))
+d2s = rep(0, length(h))
+d2c = rep(0, length(h))
+
+
+for (a in 1:64){
+  d2f[a]=10000*(sin(1+h[a])-sin(1))/h[a]
+  
+  d2s[a]=10000*(sin(1+h[a])-sin(1-h[a]))/(2*h[a])
+
+  d2c[a]=Im(10000*sin(1+h[a]*1i))/h[a]
+}
+
+plot(-log2(h), d2f, pch=1, col ="red", cex=1.2, lwd=1.5, xlab="-log2(h)", ylab="Approximations to the derivative of a function f1", main="f2(x)=10000sin(x) at x=1")
+points(-log2(h), d2s,pch=2, col="blue",lwd=1.5)
+points(-log2(h), d2c, pch=3, col="orange",lwd=1.5)
+legend("bottom", legend=c("forward difference quotient", "symmetric difference quotient", "complex number quotient"), col=c("red","blue","orange"), pch=c(1,2,3), lwd=c(1.5,1.5,1.5))
+```
+
+
+# f3(x) = tan(x) at x = 1.59
+```{r}
+h = 2^(-(1:64))
+d3f = rep(0, length(h))
+d3s = rep(0, length(h))
+d3c = rep(0, length(h))
+
+
+for (a in 1:64){
+  d3f[a]=(tan(1.59+h[a])-tan(1.59))/h[a]
+  
+  d3s[a]=(tan(1.59+h[a])-tan(1.59-h[a]))/(2*h[a])
+
+  d3c[a]=Im(tan(1.59+h[a]*1i))/h[a]
+}
+
+plot(-log2(h), d3f, pch=1, col ="red", cex=1.2, lwd=1.5, xlab="-log2(h)", ylab="Approximations to the derivative of a function f1", main="f3(x)=tan(x) at x=1.59")
+points(-log2(h), d3s, pch=2, col="blue",lwd=1.5)
+points(-log2(h), d3c, pch=3, col="orange",lwd=1.5)
+legend("bottom", legend=c("forward difference quotient", "symmetric difference quotient", "complex number quotient"), col=c("red","blue","orange"), pch=c(1,2,3), lwd=c(1.5,1.5,1.5))
+```
+
+
+# f4(x) = φ(x) at x = 0.5
+```{r}
+h = 2^(-(1:64))
+d4f = rep(0, length(h))
+d4s = rep(0, length(h))
+d4c = rep(0, length(h))
+
+
+for (a in 1:64){
+  d4f[a]=(dnorm(0.5+h[a])-dnorm(0.5))/h[a]
+  
+  d4s[a]=(dnorm(0.5+h[a])-dnorm(0.5-h[a]))/(2*h[a])
+
+  d4c[a]=Im(1/sqrt(2*pi)*exp(-(0.5+h[a]*1i)^2/2))/h[a]
+}
+
+plot(-log2(h), d4f, pch=1, col ="red", cex=1.2, lwd=1.5, xlab="-log2(h)", ylab="Approximations to the derivative of a function f1", main="f4(x)=φ(x) at x=0.5")
+points(-log2(h), d4s, pch=2, col="blue",lwd=1.5)
+points(-log2(h), d4c, pch=3, col="orange",lwd=1.5)
+legend("bottom", legend=c("forward difference quotient", "symmetric difference quotient", "complex number quotient"), col=c("red","blue","orange"), pch=c(1,2,3), lwd=c(1.5,1.5,1.5))
+```
+
+The first and second methods have unstable performances in extreme h values. In contrast, the approximations based on third methods looks like a straight line with decreasing value of h.    
+
+In conclusion,as we can see from the above four plots, the step size h should belong to range $(2^{-10}, 2^{-45})$ . Otherwise, the approximations will have inaccurate estimates and creepy jump. 
+
