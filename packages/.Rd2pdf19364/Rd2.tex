@@ -1,0 +1,103 @@
+\nonstopmode{}
+\documentclass[a4paper]{book}
+\usepackage[times,inconsolata,hyper]{Rd}
+\usepackage{makeidx}
+\usepackage[utf8]{inputenc} % @SET ENCODING@
+% \usepackage{graphicx} % @USE GRAPHICX@
+\makeindex{}
+\begin{document}
+\chapter*{}
+\begin{center}
+{\textbf{\huge Package `pareto'}}
+\par\bigskip{\large \today}
+\end{center}
+\ifthenelse{\boolean{Rd@use@hyper}}{\hypersetup{pdftitle = {pareto: What the package does (short line)}}}{}
+\begin{description}
+\raggedright{}
+\item[Type]\AsIs{Package}
+\item[Title]\AsIs{What the package does (short line)}
+\item[Version]\AsIs{1.0}
+\item[Date]\AsIs{2023-04-24}
+\item[Author]\AsIs{Who wrote it}
+\item[Maintainer]\AsIs{Who to complain to }\email{yourfault@somewhere.net}\AsIs{}
+\item[Description]\AsIs{More about what it does (maybe more than one line)}
+\item[License]\AsIs{What license is it under?}
+\item[Imports]\AsIs{Rcpp (>= 0.12.16)}
+\item[LinkingTo]\AsIs{Rcpp}
+\end{description}
+\Rdcontents{\R{} topics documented:}
+\inputencoding{utf8}
+\HeaderA{pareto-package}{What the package does (short line)}{pareto.Rdash.package}
+\aliasA{pareto}{pareto-package}{pareto}
+\keyword{package}{pareto-package}
+%
+\begin{Description}\relax
+More about what it does (maybe more than one line)
+\end{Description}
+%
+\begin{Details}\relax
+
+The DESCRIPTION file:
+This package was not yet installed at build time.\\{}
+
+Index:  This package was not yet installed at build time.\\{}
+\textasciitilde{}\textasciitilde{} An overview of how to use the package, including the most important functions \textasciitilde{}\textasciitilde{}
+\end{Details}
+%
+\begin{Author}\relax
+Who wrote it
+
+Maintainer: Who to complain to <yourfault@somewhere.net>
+\end{Author}
+%
+\begin{References}\relax
+\textasciitilde{}\textasciitilde{} Literature or other references for background information \textasciitilde{}\textasciitilde{}
+\end{References}
+%
+\begin{SeeAlso}\relax
+\textasciitilde{}\textasciitilde{} Optional links to other man pages, e.g. \textasciitilde{}\textasciitilde{}
+\textasciitilde{}\textasciitilde{} \code{\LinkA{<pkg>}{<pkg>}} \textasciitilde{}\textasciitilde{}
+\end{SeeAlso}
+%
+\begin{Examples}
+\begin{ExampleCode}
+dpareto( 2:4, 1, 2)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{dpareto}{dpareto function}{dpareto}
+%
+\begin{Description}\relax
+this function computes the density of the Pareto distribution.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+dpareto(x, alpha, beta, log = FALSE)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{x}] 
+
+
+\item[\code{alpha}] 
+
+
+\item[\code{beta}] 
+
+
+\item[\code{log}] 
+
+
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Examples}
+\begin{ExampleCode}
+dpareto( 2:4, 1, 2)
+\end{ExampleCode}
+\end{Examples}
+\printindex{}
+\end{document}
