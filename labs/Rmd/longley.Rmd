@@ -1,0 +1,95 @@
+
+# Regression Methods
+The Longley data, available as the variable longley in the package datasets, provides a well-known example for a highly colinear regression, in particular in the regression of the Employed variable on the other six variables plus an intercept. Using this data set as an illustration, this problem explores the accuracy of the QR and Cholesky factorization approaches for fitting a regression.
+
+```{r, warning=FALSE}
+library(datasets)
+
+longley = datasets::longley
+m1 = lm(Employed~., data=longley)
+summary(m1)$coefficients
+```
+
+### a. Write an R function that uses the package gmp to compute the exact coefficients, rounded to the nearest double precision numbers, of a least squares fit of a vector y to the columns of a matrix X. You may find the functions as.bigq, solve, and as.double useful. Your function should allow the arguments to be either floating point or arbitrary precision rational numbers.
+$$
+\hat{\beta}=(X^TX)^{-1}X^Ty
+$$
+```{r}
+library(gmp)
+beta.hat = function(X,y){
+  bY = as.bigq(y)
+  bX = as.bigq(X)
+  bXt = t(bX)
+  left = solve(bXt %*% bX)
+  right = bXt %*% bY
+  as.double(left %*% right)
+}
+
+
+```
+
+### b. Write an R function that uses the Cholesky factorization of the cross product matrix to compute the coefficients of a least squares fit of a vector y to the columns of a matrix X. Your function should take an optional argument center with default FALSE; if center is TRUE then X should contain only non-constant columns and you should mean center the columns before forming the Cholesky factorization (the functions sweep and apply or colMeans may be useful). When centering is used the model includes an intercept, which should be estimated and included in the result.
+
+```{r}
+Cholesky = function(X,y, center=FALSE){
+  bY=y
+  bX=X
+  if (center){
+    bX = sweep(bX[,2:dim(bX)[2]], 2, apply(bX,2,mean)[2:dim(bX)[2]])
+    # take columes that are not constant 
+    # take mean of each column and subtract
+    bX_df = data.frame(bX)
+    bX_df = cbind("(intercept)"=1, bX_df)
+    bX = as.matrix(bX_df)
+    rm(bX_df)
+    
+  } else{
+    bX=X
+  }
+  bXt = t(bX)
+  A = bXt %*% bX # Calculate A
+  R = chol(A) # returns the upper triangular Matrix t(L)
+  L = t(R)
+  solve(L %*% R)%*% bXt %*% bY
+  
+}
+
+
+```
+
+### c. Use these functions and the function lm.fit, which uses QR factorization, to compare the accuracy of coefficient estimates obtained by the QR and Cholesky approaches with and without centering for the Longley data. Does it help to apply the Cholesky factorization to mean-centered data? The function all.equal may not give you a complete picture of the relative accuracy without tuning the tolerance argument, so try to do the comparisons by other means.
+
+```{r}
+# Non-centered data
+m1 = lm(Employed ~ ., data =longley)
+as.vector(m1$coefficients)
+
+
+X = model.matrix(m1)
+y = longley$Employed
+beta.hat(X,y)
+
+
+# Comparing lm with beta.hat
+abs((as.vector(m1$coefficients)-beta.hat(X,y))/beta.hat(X,y))
+
+# Comparing lm with Cholesky
+abs((as.vector(Cholesky(X,y, center=FALSE))-beta.hat(X,y))/beta.hat(X,y))
+
+# Centered data
+m1.c = lm(Employed ~ scale(GNP.deflator, scale=FALSE)+scale(GNP, scale=FALSE)+scale(Unemployed, scale=FALSE)+scale(Armed.Forces, scale=FALSE)+scale(Population, scale=FALSE)+scale(Year, scale=FALSE), data=longley)
+as.vector(m1.c$coefficients)
+
+X1 = model.matrix(m1.c)
+y = longley$Employed
+beta.hat(X1,y)
+
+
+# Comparing lm with beta.hat
+abs((as.vector(m1.c$coefficients)-beta.hat(X,y))/beta.hat(X,y))
+
+# Comparing lm with Cholesky
+abs((as.vector(Cholesky(X1,y, center=FALSE))-beta.hat(X,y))/beta.hat(X,y))
+
+
+```
