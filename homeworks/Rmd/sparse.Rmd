@@ -1,0 +1,81 @@
+# Sparse Matrix Computations
+The log-likelihood for an observed vector y, dropping additive constants, is:
+$$
+-\frac{1}{2}log\:detC-\frac{1}{2}y^TC^{-1}y
+$$
+## (a)
+```{r}
+loglik_dmm <- function(y, a) {
+  # Check input arguments
+  stopifnot(is.numeric(y), length(y) > 1)
+  stopifnot(is.numeric(a))
+  
+  
+  n <- length(y)
+  
+  # Construct the covariance matrix of y
+  C = diag(1,n,n)
+  C[ cbind(2 : nrow(C), 1 : (nrow(C) - 1)) ]=a
+  C[ cbind(1 : (nrow(C)-1), 2 : (nrow(C))) ]=a
+  
+  # Compute Cholesky decomposition of covariance matrix
+  L = chol(C)
+  
+  C_inv = backsolve(L, diag(nrow(L))) %*% t(backsolve(L, diag(nrow(L))))
+
+  
+  # Compute log-likelihood
+  loglik <- -0.5 * log(det(C)) - 0.5 * t(y) %*% C_inv %*% y
+  
+
+
+  return(loglik)
+}
+
+
+```
+
+
+## (b)
+```{r}
+library(Matrix)
+
+loglik_dmm_sparse <- function(y, a) {
+  # Check input arguments
+  stopifnot(is.numeric(y), length(y) > 1)
+  stopifnot(is.numeric(a))
+  
+  n <- length(y)
+  
+  # Construct sparse covariance matrix of y
+  C <-  bandSparse(n, k = -c(0,1), diag = list(rep(1,n), rep(a, n)), symm=TRUE)
+  
+
+  
+  # Compute log-likelihood
+  loglik <- -0.5 * log(det(C)) - 0.5 * t(y) %*% solve(C) %*% y
+  
+  return(loglik)
+}
+
+```
+
+
+## (c)
+```{r}
+df = data.frame(y_length = rep(0, 5),
+                loglik.time = rep(0, 5),
+                loglik.sparse.time = rep(0, 5))
+for (i in 1:5){
+  y = rnorm(5^i)
+  a = 0.5
+  f1.time = system.time(loglik_dmm(y, a))
+  f2.time = system.time(loglik_dmm_sparse(y, a))
+  df[i,] = c(5^i, f1.time['elapsed'], f2.time["elapsed"])
+
+}
+df
+
+```
+
+As we can see, the system time of two functions are preform big difference when length of y is large. The function 2 use sparse matrix is better when y is a large matrix. 
