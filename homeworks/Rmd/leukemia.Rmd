@@ -1,0 +1,123 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+```{r}
+library(MASS)
+
+leuk = MASS::leuk
+
+summary(MASS::leuk )
+```
+
+
+# Optimization
+## (a)
+The pdf of the life time is a Weibull distribution with density:
+$$
+f(t_i|\alpha_i, \gamma)=\frac{\gamma}{\alpha_i}(\frac{t_i}{\alpha_i})^{\gamma-1}exp(-(\frac{t_i}{\alpha_i})^{\gamma})
+$$
+with $log(\alpha_i)=\beta_o+\beta_1x_i+\beta_2u_i$.
+Let's assume $\delta= 1/\gamma$ and $z_i=(logt_i-\beta_o-\beta_1x_i-\beta_2u_i)/\delta$, then:
+$$
+\gamma = 1/\delta\\
+ \gamma log(\frac{t_i}{\alpha_i})=z_i
+$$
+The log likelihood of for this model is:
+
+$$
+l(\alpha_i, \gamma)=logf=log\gamma-log\alpha_i+\gamma log(\frac{t_i}{\alpha_i})-log(\frac{t_i}{\alpha_i})-(\frac{t_i}{\alpha_i})^{\gamma}\\
+=-log\delta-log\alpha_i+z_i-logt_i+log\alpha_i-exp(z_i)\\
+=-log\delta-logt_i+z_i-exp(z_i)\\
+l(z, \delta)=-nlog\delta-\sum_ilogt_i+\sum_i(z_i-exp(z_i))
+$$
+After dropping additive terms constant in the parameters,this log-likelihood can be written as:
+$$
+l(\beta_0, \beta_1,\beta_2,\delta)=-nlog\delta+\sum_i(z_i-exp(z_i))
+$$
+
+## (b)
+```{r}
+t <- leuk$time
+x <- log(leuk$wbc/10000)
+u <- ifelse(leuk$ag == "present", 1, 0)
+
+
+# Define log-likelihood function
+loglik <- function(para) {
+  beta0 <- para[1]
+  beta1 <- para[2]
+  beta2 <- para[3]
+  delta <- para[4]
+  z <- (log(t) - beta0 - beta1 * x - beta2 * u) / delta
+  res = sum(z - exp(z)) - length(t) * log(delta) - sum(log(t))
+  return(-res)
+}
+```
+
+```{r, warning=FALSE}
+# Find MLEs using optim
+start_para <- c(1, 3, 1, 2)
+optim_out <- optim(start_para, loglik, hessian = TRUE)
+beta0_mle <- optim_out$par[1]
+beta1_mle <- optim_out$par[2]
+beta2_mle <- optim_out$par[3]
+delta_mle <- optim_out$par[4]
+
+vcov_mle <- solve(optim_out$hessian)
+
+# Compute standard errors
+se_beta0_mle <- sqrt(vcov_mle[1, 1])
+se_beta1_mle <- sqrt(vcov_mle[2, 2])
+se_beta2_mle <- sqrt(vcov_mle[3, 3])
+se_delta_mle <- sqrt(vcov_mle[4, 4])
+
+
+mle_table <- data.frame(Parameter = c("beta0", "beta1", "beta2", "delta"),
+                         MLE = c(beta0_mle, beta1_mle, beta2_mle, delta_mle),
+                         SE = c(se_beta0_mle, se_beta1_mle, se_beta2_mle, se_delta_mle))
+print(mle_table)
+```
+
+
+## (c)
+Take partial derivative to each parameters:
+$$
+\frac{\partial l}{\partial\beta_0}=-\frac{n}{\delta}+\frac{1}{\delta}\sum_iexp(\frac{logt_i-\beta_0-\beta_1x_i-\beta_2u_i}{\delta})\\
+$$
+$$
+\frac{\partial l}{\partial\beta_1}=-\frac{\sum_ix_i}{\delta}+\frac{1}{\delta}\sum_ix_iexp(\frac{logt_i-\beta_0-\beta_1x_i-\beta_2u_i}{\delta})\\
+$$
+$$
+\frac{\partial l}{\partial\beta_2}=-\frac{\sum_iu_i}{\delta}+\frac{1}{\delta}\sum_iu_iexp(\frac{logt_i-\beta_0-\beta_1x_i-\beta_2u_i}{\delta})\\
+$$
+$$
+\frac{\partial l}{\partial\delta}=-\frac{n}{\delta}-\frac{\sum_i(logt_i-\beta_0-\beta_1x_i-\beta_2u_i)}{\delta^2}+\frac{1}{\delta^2}\sum_i(logt_i-\beta_0-\beta_1x_i-\beta_2u_i)exp(\frac{logt_i-\beta_0-\beta_1x_i-\beta_2u_i}{\delta})
+$$
+Then replace each with the estimated value we have from the optim function:
+```{r}
+n = length(t)
+z = (log(t) - beta0_mle - beta1_mle * x - beta2_mle * u) / delta_mle
+beta0_partial = - n/delta_mle + 1/delta_mle * sum(exp(z))
+beta1_partial = -sum(x)/delta_mle + 1/delta_mle * sum(x*exp(z))
+beta2_partial = -sum(u)/delta_mle + 1/delta_mle * sum(u*exp(z))
+delta_partial = - n/delta_mle - sum(z)/(delta_mle) + 1/(delta_mle^2) * sum(z*delta_mle*exp(z))
+
+
+beta0_partial
+beta1_partial
+beta2_partial
+delta_partial
+```
+Partial derivatives of each parameter are close to zero. 
+
+```{r}
+library(numDeriv)
+para_mle = c(beta0_mle, beta1_mle, beta2_mle, delta_mle)
+grad(loglik,para_mle, method = "complex")
+```
+Partial derivatives of each parameter are close to zero. 
+
+
+
