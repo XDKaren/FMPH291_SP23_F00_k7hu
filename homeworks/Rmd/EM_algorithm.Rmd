@@ -1,0 +1,123 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+```{r}
+# Simulate a Multinormal Mixture Model
+
+library(mvtnorm) 
+set.seed(123)  
+
+
+p <- c(0.4, 0.3, 0.3)  
+mu <- list(
+  matrix(c(1, 2), nrow = 2),  
+  matrix(c(3, 4), nrow = 2),  
+  matrix(c(5, 6), nrow = 2)   
+)
+sigma <- list(
+  matrix(c(1, 0.2, 0.2, 2), nrow = 2), 
+  matrix(c(1, -0.5, -0.5, 1.2), nrow = 2),
+  matrix(c(1, 0, 0, 0.5), nrow = 2)        
+)
+
+N <- 100  
+J <- sample(1:3, N, replace = TRUE, prob = p) 
+X <- matrix(NA, nrow = N, ncol = 2)  
+Z <- matrix(0, nrow = N, ncol = 3)
+
+for (i in 1:N) {
+  j <- J[i]  
+  mu_i <- mu[[j]] 
+  sigma_i <- sigma[[j]] 
+  
+  X[i,] <- rmvnorm(1, mean = mu_i, sigma = sigma_i)
+  Z[i,j] <- 1
+}
+head(X)
+head(Z)
+```
+
+```{r}
+# Fitting via the EM algorithm
+
+# E-step: Compute the responsibilities
+estep <- function(X, p, mu, sigma) {
+  N <- nrow(X)  # Number of samples
+  K <- length(p)  # Number of components
+  
+  H <- matrix(0, nrow = N, ncol = K)
+  
+  for (i in 1:N) {
+    for (k in 1:K) {
+      H[i, k] <- p[k] * dmvnorm(X[i, ], mean = mu[k, ], sigma = sigma[[k]])
+    }
+    H[i, ] <- H[i, ] / sum(H[i, ])  # Normalize the responsibilities
+  }
+  
+  H
+}
+
+# M-step: Update the parameters
+mstep <- function(X, H) {
+  N <- nrow(X)  # Number of samples
+  K <- ncol(H)  # Number of components
+  
+  p <- colMeans(H)  # Update mixing proportions
+  
+  mu <- matrix(0, nrow = K, ncol = 2)  # Initialize means
+  
+  for (k in 1:K) {
+    mu[k, ] <- colSums(H[, k] * X) / sum(H[, k])
+  }
+  
+  sigma <- lapply(1:K, function(k) {
+    mu_diff <- t(t(X) - mu[k, ])
+    cov_matrix <- t(H[, k] * mu_diff) %*% mu_diff / sum(H[, k])
+  })
+  
+  list(p = p, mu = mu, sigma = sigma)
+}
+
+
+# Define the EM algorithm
+em_algorithm <- function(X, max_iter = 1000, esp = 1e-6) {
+  N <- nrow(X)  # Number of samples
+  K <- 3  # Number of components
+  
+  # Initialize the parameters
+  p <- rep(1/K, K)  # Mixing proportions
+  mu <- matrix(runif(2 * K), ncol = 2)  # Means
+  sigma <- lapply(1:K, function(k) diag(runif(2)))  # Covariance matrices
+  
+  # EM algorithm iterations
+  for (iter in 1:max_iter) {
+    # E-step
+    H <- estep(X, p, mu, sigma)
+    
+    # M-step
+    prev_params <- list(p, mu, sigma)
+    params <- mstep(X, H)
+    p <- params[[1]]
+    mu <- params[[2]]
+    sigma <- params[[3]]
+    
+    # Check convergence
+    if (max(abs(unlist(params) - unlist(prev_params))) < esp) {
+      break
+    }
+  }
+  
+  # Return the estimated parameters
+  list(p = p, mu = mu, sigma = sigma)
+}
+
+
+
+
+# Example usage
+result <- em_algorithm(X)
+print(result)
+
+```
