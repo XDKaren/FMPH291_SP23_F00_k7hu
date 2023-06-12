@@ -1,0 +1,111 @@
+```{r}
+set.seed(123)
+n <- 9
+N <- 1000
+
+# Custom function to calculate the trimean using specific order statistics
+trimean <- function(x) {
+  X3 <- sort(x)[3]
+  X5 <- sort(x)[5]
+  X7 <- sort(x)[7]
+  (X3 + 2 * X5 + X7) / 4
+}
+
+# Initialize vectors to store results
+trimean_normal <- rep(NA,N)
+trimean_t4 <- rep(NA,N)
+trimean_t10 <- rep(NA,N)
+
+# Perform simulations
+for (i in 1:N) {
+  # Generate samples from standard normal distribution
+  samples_normal <- rnorm(n)
+  # Generate samples from t-distribution with 4 degrees of freedom
+  samples_t4 <- rt(n, df = 4)
+  # Generate samples from t-distribution with 10 degrees of freedom
+  samples_t10 <- rt(n, df = 10)
+  
+  # Calculate trimean for each distribution
+  trimean_normal[i] <- trimean(samples_normal)
+  trimean_t4[i] <- trimean(samples_t4)
+  trimean_t10[i] <- trimean(samples_t10)
+}
+
+# Calculate estimate of trimean (also is bias since the true trimean of each distribution is 0)
+mean_normal <- mean(trimean_normal)
+mean_t4 <- mean(trimean_t4)
+mean_t10 <- mean(trimean_t10)
+
+# Calculate variances of trimean
+var_normal <- var(trimean_normal)
+var_t4 <- var(trimean_t4)
+var_t10 <- var(trimean_t10)
+
+# Calculate standard errors
+se_normal <- sqrt (var_normal / N)
+se_t4 <- sqrt (var_t4 / N)
+se_t10 <- sqrt (var_t10 / N)
+
+
+# Create a table of results including standard errors
+table_results <- data.frame(
+  Distribution = c("Standard Normal", "t-distribution (df = 4)", "t-distribution (df = 10)"),
+  Trimean_Estimate_Bias = c(mean_normal, mean_t4, mean_t10),
+  SE_TriMean = c(se_normal, se_t4, se_t10),
+  Variance = c(var_normal, var_t4, var_t10)
+)
+
+# Print the table
+print(table_results)
+```
+
+# Variance reduction
+```{r}
+set.seed(123)
+# Use mean as control variate
+# Initialize vectors to store results
+trimean2_normal <- rep(NA,N)
+trimean2_t4 <- rep(NA,N)
+trimean2_t10 <- rep(NA,N)
+# Perform simulations
+for (i in 1:N) {
+  # Generate samples from standard normal distribution
+  samples_normal <- rnorm(n)
+  # Generate samples from t-distribution with 4 degrees of freedom
+  samples_t4 <- rt(n, df = 4)
+  # Generate samples from t-distribution with 10 degrees of freedom
+  samples_t10 <- rt(n, df = 10)
+  
+  # Calculate trimean for each distribution
+  trimean2_normal[i] <- trimean(samples_normal)- 1 * (mean(samples_normal) - 0)
+  trimean2_t4[i] <- trimean(samples_t4)- 1 * (mean(samples_normal) - 0)
+  trimean2_t10[i] <- trimean(samples_t10)- 1 * (mean(samples_normal) - 0)
+}
+
+# Calculate estimate of trimean (also is bias since the true trimean of each distribution is 0)
+mean2_normal <- mean(trimean2_normal)
+mean2_t4 <- mean(trimean2_t4)
+mean2_t10 <- mean(trimean2_t10)
+
+# Calculate variances of trimean
+var2_normal <- var(trimean2_normal)
+var2_t4 <- var(trimean2_t4)
+var2_t10 <- var(trimean2_t10)
+
+# Calculate standard errors
+se2_normal <- sqrt (var2_normal / N)
+se2_t4 <- sqrt (var2_t4 / N)
+se2_t10 <- sqrt (var2_t10 / N)
+
+
+# Create a table of results including standard errors
+table_results <- data.frame(
+  Distribution = c("Standard Normal", "t-distribution (df = 4)", "t-distribution (df = 10)"),
+  Trimean_Estimate_Bias = c(mean2_normal, mean2_t4, mean2_t10),
+  SE_TriMean = c(se2_normal, se2_t4, se2_t10),
+  Variance = c(var2_normal, var2_t4, var2_t10)
+)
+
+# Print the table
+print(table_results)
+```
